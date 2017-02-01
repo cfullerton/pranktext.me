@@ -31,7 +31,7 @@ queryDBFrequency("1",function(err,result){
     if(err){
         console.log(err);
     }else{
-        console.log(result)
+        sendTexts(result);
     }
 
 })
@@ -40,9 +40,20 @@ queryDBFrequency("1",function(err,result){
     if(err){
         console.log(err);
     }else{
-        console.log(result)
+        sendTexts(result);
     }
 
 })
+}
+function sendTexts(input){
+  var list = input.items;
+  var topics = {};
+  for (var i=0;i<list.length;i++){
+    console.log(list[i])
+    if (!topics[list[i].topic]){
+      topics[list[i].topic] = [];
+    }
+  }
+  console.log(topics);
 }
 };
