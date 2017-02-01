@@ -24,6 +24,23 @@ exports.handler = (event, context, callback) => {
 
     docClient.query(params,callback);
 };
+var queryTopics = function(values,callback) {
+var docClient = new AWS.DynamoDB.DocumentClient();
+
+var params = {
+        TableName: "topics",
+        IndexName:'topic-index',
+        KeyConditionExpression: "#topic = :topic",
+        ExpressionAttributeNames:{
+            "#topic": "topic"
+        },
+        ExpressionAttributeValues: {
+            ":topic":value
+        }
+    };
+
+docClient.query(params,callback);
+};
 var time = new Date().getMinutes();
 console.log(time);
 if (time < 2){
@@ -46,14 +63,25 @@ queryDBFrequency("1",function(err,result){
 })
 }
 function sendTexts(input){
-  var list = input.items;
+  var list = input.Items;
   var topics = {};
+  var topicList = [];
   for (var i=0;i<list.length;i++){
-    console.log(list[i])
     if (!topics[list[i].topic]){
-      topics[list[i].topic] = [];
+      topics[list[i].topic] = {};
+      topicList.push(list[i].topic);
     }
   }
   console.log(topics);
+  for(var i = 0; i < topicList.length; i++){
+    queryTopics(topicList[i],function(err,result){
+       if (err){
+         console.log(err);
+       }else{
+         topics[list[i].topic] = result;
+       }
+    })
+  }
+  // do stuff after getting topics, getting topics might need to be async
 }
 };
