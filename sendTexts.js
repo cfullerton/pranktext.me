@@ -24,12 +24,12 @@ exports.handler = (event, context, callback) => {
 
     docClient.query(params,callback);
 };
-var queryTopics = function(values,callback) {
+var queryTopics = function(value,callback) {
 var docClient = new AWS.DynamoDB.DocumentClient();
 
 var params = {
         TableName: "topics",
-        IndexName:'topic-index',
+        IndexName:'topic',
         KeyConditionExpression: "#topic = :topic",
         ExpressionAttributeNames:{
             "#topic": "topic"
@@ -42,7 +42,6 @@ var params = {
 docClient.query(params,callback);
 };
 var time = new Date().getMinutes();
-console.log(time);
 if (time < 2){
 queryDBFrequency("1",function(err,result){
     if(err){
@@ -53,7 +52,7 @@ queryDBFrequency("1",function(err,result){
 
 })
 }else {
-  queryDBFrequency("4",function(err,result){
+  queryDBFrequency("1",function(err,result){
     if(err){
         console.log(err);
     }else{
@@ -66,19 +65,21 @@ function sendTexts(input){
   var list = input.Items;
   var topics = {};
   var topicList = [];
-  for (var i=0;i<list.length;i++){
+  for (i in list){
+
     if (!topics[list[i].topic]){
-      topics[list[i].topic] = {};
+      topics[list[i]] = {};
       topicList.push(list[i].topic);
     }
   }
-  console.log(topics);
+
   for(var i = 0; i < topicList.length; i++){
     queryTopics(topicList[i],function(err,result){
        if (err){
          console.log(err);
        }else{
-         topics[list[i].topic] = result;
+         topics[list[i]] = result.Items;
+         console.log(topics)
        }
     })
   }
